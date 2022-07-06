@@ -541,7 +541,6 @@ export function registerPorts(context: GitpodExtensionContext): void {
 	// register webview
 	let portViewProvider: GitpodPortViewProvider | undefined;
 	if (isPortsViewExperimentEnable) {
-		vscode.commands.executeCommand('setContext', 'gitpod.portsView.visible', true);
 		portViewProvider = new GitpodPortViewProvider(context);
 		context.subscriptions.push(vscode.window.registerWebviewViewProvider(GitpodPortViewProvider.viewType, portViewProvider, { webviewOptions: { retainContextWhenHidden: true } }));
 	}
