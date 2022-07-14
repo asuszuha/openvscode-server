@@ -41,6 +41,16 @@
         "title": "%stopWorkspace%",
         "enablement": "gitpod.inWorkspace == true && gitpod.workspaceOwned == true"
       },
+	  {
+		"command": "gitpod.releaseNote",
+		"title": "%showReleaseNote%",
+		"enablement": "gitpod.inWorkspace == true && gitpod.workspaceOwned == true"
+	  },
+	  {
+		"command": "gitpod.cleanReleaseNoteCache",
+		"title": "%cleanReleaseNoteCache%",
+		"enablement": "gitpod.inWorkspace == true && gitpod.workspaceOwned == true"
+	  },
       {
         "command": "gitpod.open.settings",
         "title": "%openSettings%",

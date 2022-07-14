@@ -10,6 +10,8 @@
 	"openTwitter": "Gitpod: Follow us on Twitter",
 	"reportIssue": "Gitpod: Report Issue",
 	"stopWorkspace": "Gitpod: Stop Workspace",
+	"showReleaseNote": "Gitpod: Show Release Note",
+	"cleanReleaseNoteCache": "Gitpod: Debug Clean Release Note Cache",
 	"upgradeSubscription": "Gitpod: Upgrade Subscription",
 	"extendTimeout": "Gitpod: Extend Workspace Timeout",
 	"takeSnapshot": "Gitpod: Share Workspace Snapshot",
