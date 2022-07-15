@@ -284,7 +284,6 @@ type GitpodWorkspaceElement = PortsTreeItem | PortTreeItem;
 export class GitpodWorkspaceTreeDataProvider implements vscode.TreeDataProvider<GitpodWorkspaceElement> {
 
 	readonly ports = new PortsTreeItem('Ports', vscode.TreeItemCollapsibleState.Expanded);
-	readonly portViewNotice = new PortsTreeItem('Please try new Ports view and provide your feedback', vscode.TreeItemCollapsibleState.None);
 
 	protected readonly onDidChangeTreeDataEmitter = new vscode.EventEmitter<GitpodWorkspaceElement | undefined>();
 	readonly onDidChangeTreeData = this.onDidChangeTreeDataEmitter.event;
@@ -293,13 +292,7 @@ export class GitpodWorkspaceTreeDataProvider implements vscode.TreeDataProvider<
 	readonly onDidExposeServedPort = this.onDidExposeServedPortEmitter.event;
 
 
-	constructor(private readonly context: GitpodExtensionContext, private isPortsViewExperimentEnable?: boolean) {
-		this.portViewNotice.iconPath = new vscode.ThemeIcon('info', new vscode.ThemeColor('foreground'));
-		this.portViewNotice.command = {
-			title: '',
-			command: 'gitpod.portsView.focus'
-		};
-	}
+	constructor(private readonly context: GitpodExtensionContext, private isPortsViewExperimentEnable?: boolean) { }
 
 	updateIsPortsViewExperimentEnable(value: boolean) {
 		this.isPortsViewExperimentEnable = value;
@@ -315,11 +308,7 @@ export class GitpodWorkspaceTreeDataProvider implements vscode.TreeDataProvider<
 			return [this.ports];
 		}
 		if (element === this.ports) {
-			const list: GitpodWorkspaceElement[] = [...this.ports.ports.values()];
-			if (this.isPortsViewExperimentEnable) {
-				list.unshift(this.portViewNotice);
-			}
-			return list;
+			return [...this.ports.ports.values()];
 		}
 		return [];
 	}
@@ -527,7 +516,7 @@ export function getNonce() {
 interface PortItem { port: GitpodWorkspacePort; isWebview?: boolean }
 
 export function registerPorts(context: GitpodExtensionContext): void {
-	const isPortsViewExperimentEnable = vscode.workspace.getConfiguration('gitpod.experimental.portsView').get<boolean>('.enabled');
+	const isPortsViewExperimentEnable = vscode.workspace.getConfiguration('gitpod.experimental.portsView').get<boolean>('enabled');
 
 	const portMap = new Map<number, GitpodWorkspacePort>();
 	const tunnelMap = new Map<number, vscode.TunnelDescription>();
@@ -706,6 +695,7 @@ export function registerPorts(context: GitpodExtensionContext): void {
 
 		portsStatusBarItem.text = text;
 		portsStatusBarItem.tooltip = tooltip;
+		const isPortsViewExperimentEnable = vscode.workspace.getConfiguration('gitpod.experimental.portsView').get<boolean>('enabled');
 		portsStatusBarItem.command = isPortsViewExperimentEnable ? 'gitpod.portsView.focus' : 'gitpod.ports.reveal';
 		portsStatusBarItem.show();
 	}
@@ -851,9 +841,11 @@ export function registerPorts(context: GitpodExtensionContext): void {
 			return;
 		}
 		const isPortsViewExperimentEnable = vscode.workspace.getConfiguration('gitpod.experimental.portsView').get<boolean>('enabled');
-		portsStatusBarItem.command = isPortsViewExperimentEnable ? 'gitpod.portsView.focus' : 'gitpod.ports.reveal';
+		vscode.commands.executeCommand('setContext', 'gitpod.portsView.visible', isPortsViewExperimentEnable);
 		gitpodWorkspaceTreeDataProvider.updateIsPortsViewExperimentEnable(isPortsViewExperimentEnable ?? false);
+		updateStatusBar();
 	});
+	vscode.commands.executeCommand('setContext', 'gitpod.portsView.visible', isPortsViewExperimentEnable);
 }
 
 export function registerWelcomeWalkthroughCommands(context: GitpodExtensionContext): void {
