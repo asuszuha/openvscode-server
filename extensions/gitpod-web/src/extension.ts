@@ -527,8 +527,7 @@ export function getNonce() {
 interface PortItem { port: GitpodWorkspacePort; isWebview?: boolean }
 
 export function registerPorts(context: GitpodExtensionContext): void {
-	const experimentCfg = vscode.workspace.getConfiguration('gitpod.experimental');
-	const isPortsViewExperimentEnable = experimentCfg.get<boolean>('portsView.enabled');
+	const isPortsViewExperimentEnable = vscode.workspace.getConfiguration('gitpod.experimental.portsView').get<boolean>('.enabled');
 
 	const portMap = new Map<number, GitpodWorkspacePort>();
 	const tunnelMap = new Map<number, vscode.TunnelDescription>();
@@ -537,6 +536,23 @@ export function registerPorts(context: GitpodExtensionContext): void {
 	const gitpodWorkspaceTreeDataProvider = new GitpodWorkspaceTreeDataProvider(context, isPortsViewExperimentEnable);
 	const treeView = vscode.window.createTreeView('gitpod.workspace', { treeDataProvider: gitpodWorkspaceTreeDataProvider });
 	context.subscriptions.push(treeView);
+	let hasShownTryItOut = false;
+	treeView.onDidChangeVisibility(async (e) => {
+		const config = vscode.workspace.getConfiguration('gitpod.experimental.portsView');
+		if (hasShownTryItOut || !e.visible || config.get<boolean>('enabled') || config.get<boolean>('neverPrompt') === true) {
+			return;
+		}
+		hasShownTryItOut = true;
+		const openAction = 'Open';
+		const neverAgain = 'Don\'t Show Again';
+		const action = await vscode.window.showInformationMessage('Do you want to try with our new experimental Ports view?', openAction, neverAgain);
+		if (action === openAction) {
+			config.update('enabled', true, true);
+			vscode.commands.executeCommand('gitpod.portsView.focus');
+		} else if (action === neverAgain) {
+			config.update('neverPrompt', true, true);
+		}
+	});
 
 	// register webview
 	const portViewProvider = new GitpodPortViewProvider(context);
@@ -834,7 +850,7 @@ export function registerPorts(context: GitpodExtensionContext): void {
 		if (!e.affectsConfiguration('gitpod.experimental.portsView.enabled')) {
 			return;
 		}
-		const isPortsViewExperimentEnable = experimentCfg.get<boolean>('portsView.enabled');
+		const isPortsViewExperimentEnable = vscode.workspace.getConfiguration('gitpod.experimental.portsView').get<boolean>('enabled');
 		portsStatusBarItem.command = isPortsViewExperimentEnable ? 'gitpod.portsView.focus' : 'gitpod.ports.reveal';
 		gitpodWorkspaceTreeDataProvider.updateIsPortsViewExperimentEnable(isPortsViewExperimentEnable ?? false);
 	});
